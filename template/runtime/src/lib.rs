@@ -55,8 +55,7 @@ use sp_runtime::{
 		IdentifyAccount, NumberFor, One, PostDispatchInfoOf, Verify,
 	},
 	transaction_validity::{
-		InvalidTransaction, TransactionSource, TransactionValidity, TransactionValidityError,
-		UnknownTransaction,
+		TransactionSource, TransactionValidity, TransactionValidityError, UnknownTransaction,
 	},
 	ApplyExtrinsicResult, Perbill,
 };
@@ -390,32 +389,8 @@ impl fp_self_contained::SelfContainedCall for RuntimeCall {
 	fn check_self_contained(&self) -> Option<Result<Self::SignedInfo, TransactionValidityError>> {
 		match self {
 			RuntimeCall::Cosmos(call) =>
-				if let pallet_cosmos::Call::transact { tx } = call {
-					let check = || {
-						if let Some(hp_cosmos::SignerPublicKey::Single(
-							hp_cosmos::PublicKey::Secp256k1(pk),
-						)) = tx.auth_info.signer_infos[0].public_key
-						{
-							if hp_io::crypto::secp256k1_ecdsa_verify(
-								&tx.signatures[0],
-								tx.hash.as_bytes(),
-								&pk,
-							) {
-								Ok(Self::SignedInfo::from(pk))
-							} else {
-								Err(InvalidTransaction::Custom(
-									hp_cosmos::error::TransactionValidationError::InvalidSignature
-										as u8,
-								))?
-							}
-						} else {
-							Err(InvalidTransaction::Custom(
-								hp_cosmos::error::TransactionValidationError::UnsupportedSignerType
-									as u8,
-							))?
-						}
-					};
-					Some(check())
+				if let Some(Ok(pk)) = call.check_self_contained() {
+					Some(Ok(Self::SignedInfo::from(pk)))
 				} else {
 					None
 				},

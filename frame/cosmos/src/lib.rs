@@ -39,7 +39,7 @@ use frame_support::{
 };
 use frame_system::{pallet_prelude::OriginFor, CheckWeight};
 use hp_cosmos::{Account, Msg};
-use sp_core::H160;
+use sp_core::{ecdsa, H160};
 use sp_runtime::{
 	traits::{BadOrigin, Convert, DispatchInfoOf, Dispatchable, UniqueSaturatedInto},
 	transaction_validity::{
@@ -75,19 +75,17 @@ where
 		matches!(self, Call::transact { .. })
 	}
 
-	pub fn check_self_contained(&self) -> Option<Result<H160, TransactionValidityError>> {
+	pub fn check_self_contained(&self) -> Option<Result<ecdsa::Public, TransactionValidityError>> {
 		if let Call::transact { tx } = self {
 			let check = || {
 				if let Some(hp_cosmos::SignerPublicKey::Single(hp_cosmos::PublicKey::Secp256k1(
 					pk,
 				))) = tx.auth_info.signer_infos[0].public_key
 				{
-					if hp_io::crypto::secp256k1_ecdsa_verify(
-						&tx.signatures[0],
-						tx.hash.as_bytes(),
-						&pk,
-					) {
-						Ok(hp_io::crypto::ripemd160(&sp_io::hashing::sha2_256(&pk)).into())
+					let sig = &tx.signatures[0];
+					let msg = tx.hash.as_bytes();
+					if hp_io::crypto::secp256k1_ecdsa_verify(sig, msg, &pk) {
+						Ok(ecdsa::Public::from_raw(pk))
 					} else {
 						Err(InvalidTransaction::Custom(
 							hp_cosmos::error::TransactionValidationError::InvalidSignature as u8,
