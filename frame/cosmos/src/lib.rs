@@ -273,8 +273,6 @@ impl<T: Config> Pallet<T> {
 
 		if transaction_nonce < who.sequence {
 			return Err(TransactionValidityError::Invalid(InvalidTransaction::Stale))
-		} else if transaction_nonce > who.sequence {
-			return Err(TransactionValidityError::Invalid(InvalidTransaction::Future))
 		}
 		let mut total_payment = 0u128;
 		total_payment = total_payment.saturating_add(tx.auth_info.fee.amount[0].amount);
