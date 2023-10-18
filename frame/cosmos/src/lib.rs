@@ -220,7 +220,7 @@ pub mod pallet {
 	where
 		OriginFor<T>: Into<Result<RawOrigin, OriginFor<T>>>,
 	{
-		/// Transact an Cosmos transaction.
+		/// Transact a Cosmos transaction.
 		#[pallet::call_index(0)]
 		#[pallet::weight(tx.auth_info.fee.gas_limit)]
 		pub fn transact(origin: OriginFor<T>, tx: hp_cosmos::Tx) -> DispatchResultWithPostInfo {
