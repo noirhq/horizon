@@ -32,7 +32,7 @@ use cosmrs::{self, tx::MessageExt};
 #[cfg(feature = "std")]
 use error::DecodeTxError;
 #[cfg(feature = "std")]
-use legacy::SignAminoDoc;
+use legacy::StdSignDoc;
 #[cfg(feature = "with-codec")]
 use parity_scale_codec::{Decode, Encode};
 #[cfg(feature = "with-codec")]
@@ -126,7 +126,7 @@ impl Tx {
 					.map_err(|_| DecodeTxError::InvalidTxData)?;
 					sign_doc.into_bytes().map_err(|_| DecodeTxError::InvalidSignDoc)?
 				},
-				SignMode::LegacyAminoJson => SignAminoDoc::new(&tx_origin, chain_id)?.to_bytes()?,
+				SignMode::LegacyAminoJson => StdSignDoc::new(&tx_origin, chain_id)?.to_bytes()?,
 				_ => return Err(DecodeTxError::UnsupportedSignMode),
 			},
 			_ => return Err(DecodeTxError::UnsupportedSignMode),
@@ -365,7 +365,7 @@ impl From<&cosmrs::Coin> for Coin {
 
 #[cfg(test)]
 mod tests {
-	use crate::legacy::SignAminoDoc;
+	use crate::legacy::StdSignDoc;
 	use base64ct::{Base64, Encoding};
 	use sp_core::hashing::sha2_256;
 
@@ -374,7 +374,7 @@ mod tests {
 		let tx_bytes =  "Cp0BCpgBChwvY29zbW9zLmJhbmsudjFiZXRhMS5Nc2dTZW5kEngKLWNvc21vczFwdnJhbjRkbDl1NzNxNXo0dzNtY2xnbDUzMGtsdHdxY2EwMnk4ZBItY29zbW9zMThwd3ZxajB0ZG5oZ20zM241bG4wMjBqdnk4MjBmcjI5aDJtc213GhgKBHVjZHQSEDEwMDAwMDAwMDAwMDAwMDASABJkClAKRgofL2Nvc21vcy5jcnlwdG8uc2VjcDI1NmsxLlB1YktleRIjCiED9ZPCan9HZlZbW/+hDSWLfy6cW+aPzrjSILmLmCSnUUcSBAoCCH8YABIQCgoKBHVjZHQSAjI1EKCNBhpA0YAS1zXHInFcdO2w/tZjTEWa9fNs53mTsitzpx21mxRVaJv8lJ2eErg+/IWvCWLHfsh71fMxOY2AJ7DrQIzTxg==";
 		let tx_bytes = Base64::decode_vec(tx_bytes).unwrap();
 		let tx = cosmrs::Tx::from_bytes(&tx_bytes).unwrap();
-		let sign_doc = SignAminoDoc::new(&tx, "noir").unwrap();
+		let sign_doc = StdSignDoc::new(&tx, "noir").unwrap();
 		let hash = sha2_256(&sign_doc.to_bytes().unwrap());
 		assert_eq!(
 			array_bytes::bytes2hex("", &hash),

@@ -86,7 +86,7 @@ pub enum TypedMsg {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct SignAminoDoc {
+pub struct StdSignDoc {
 	pub chain_id: String,
 	pub sequence: String,
 	pub account_number: String,
@@ -95,7 +95,7 @@ pub struct SignAminoDoc {
 	pub msgs: Vec<Msg>,
 }
 
-impl SignAminoDoc {
+impl StdSignDoc {
 	pub fn to_json(&self) -> Result<String, DecodeTxError> {
 		Ok(serde_json::to_value(self)
 			.map_err(|_| DecodeTxError::InvalidSignDoc)?
