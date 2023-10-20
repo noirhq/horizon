@@ -228,7 +228,7 @@ impl TryFrom<&cosmrs::Any> for Msg {
 			if typed_msg.amount.len() > 1 {
 				return Err(DecodeTxError::TooManyMsgSendAmount)
 			}
-			let amount = typed_msg.amount.iter().map(|c| c.into()).collect::<Vec<Coin>>();
+			let amount = typed_msg.amount.iter().map(|coin| coin.into()).collect::<Vec<Coin>>();
 			let mut from_address: [u8; 20] = [0u8; 20];
 			from_address.copy_from_slice(&typed_msg.from_address.to_bytes()[..]);
 			let mut to_address: [u8; 20] = [0u8; 20];
@@ -281,15 +281,15 @@ impl TryFrom<cosmrs::tx::SignerInfo> for SignerInfo {
 	fn try_from(signer_info: cosmrs::tx::SignerInfo) -> Result<Self, Self::Error> {
 		let public_key = match signer_info.public_key {
 			Some(pubkey) => match pubkey {
-				cosmrs::tx::SignerPublicKey::Single(p) => match p.type_url() {
+				cosmrs::tx::SignerPublicKey::Single(pk) => match pk.type_url() {
 					cosmrs::crypto::PublicKey::ED25519_TYPE_URL => {
 						let mut raw_bytes: [u8; 32] = [0u8; 32];
-						raw_bytes.copy_from_slice(&p.to_bytes()[..]);
+						raw_bytes.copy_from_slice(&pk.to_bytes()[..]);
 						Some(SignerPublicKey::Single(PublicKey::Ed25519(raw_bytes)))
 					},
 					cosmrs::crypto::PublicKey::SECP256K1_TYPE_URL => {
 						let mut raw_bytes: [u8; 33] = [0u8; 33];
-						raw_bytes.copy_from_slice(&p.to_bytes()[..]);
+						raw_bytes.copy_from_slice(&pk.to_bytes()[..]);
 						Some(SignerPublicKey::Single(PublicKey::Secp256k1(raw_bytes)))
 					},
 					_ => return Err(DecodeTxError::UnsupportedSignerType),
@@ -334,7 +334,7 @@ impl TryFrom<cosmrs::tx::Fee> for Fee {
 		if fee.amount.is_empty() {
 			return Err(DecodeTxError::EmptyFeeAmount)
 		}
-		let amount = fee.amount.iter().map(|c| c.into()).collect::<Vec<Coin>>();
+		let amount = fee.amount.iter().map(|coin| coin.into()).collect::<Vec<Coin>>();
 		Ok(Self { amount, gas_limit: fee.gas_limit })
 	}
 }
