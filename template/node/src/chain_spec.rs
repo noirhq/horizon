@@ -148,6 +148,7 @@ fn testnet_genesis(
 			code: wasm_binary.to_vec(),
 			..Default::default()
 		},
+		assets: Default::default(),
 		balances: BalancesConfig {
 			// Configure endowed accounts with initial balance of (1 << 52) - (1 << 50).
 			balances: endowed_accounts

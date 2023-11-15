@@ -32,13 +32,14 @@ use frame_support::{
 	construct_runtime, parameter_types,
 	traits::{
 		tokens::{fungible, Fortitude, Preservation},
-		ConstBool, ConstU32, ConstU8, OnTimestampSet,
+		AsEnsureOriginWithArg, ConstBool, ConstU32, ConstU8, OnTimestampSet,
 	},
 	weights::{
 		constants::{RocksDbWeight as RuntimeDbWeight, WEIGHT_REF_TIME_PER_MILLIS},
 		IdentityFee, Weight,
 	},
 };
+use frame_system::{EnsureRoot, EnsureSigned};
 use hp_crypto::EcdsaExt;
 use pallet_cosmos::handler::cosm::MsgHandler;
 use pallet_grandpa::{
@@ -47,7 +48,7 @@ use pallet_grandpa::{
 use pallet_transaction_payment::{ConstFeeMultiplier, CurrencyAdapter, Multiplier};
 use sp_api::impl_runtime_apis;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
-use sp_core::{crypto::KeyTypeId, OpaqueMetadata, H160};
+use sp_core::{crypto::KeyTypeId, ConstU128, OpaqueMetadata, H160};
 use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
 	traits::{
@@ -205,6 +206,40 @@ impl frame_system::Config for Runtime {
 	type MaxConsumers = ConstU32<16>;
 }
 
+/// Constant values used within the runtime.
+pub const MICROUNIT: Balance = 1_000_000;
+pub const MILLIUNIT: Balance = 1_000 * MICROUNIT;
+pub const UNIT: Balance = 1_000 * MILLIUNIT;
+
+parameter_types! {
+	pub const AssetDeposit: Balance = 100 * UNIT;
+	pub const ApprovalDeposit: Balance = 1 * UNIT;
+	pub const StringLimit: u32 = 50;
+	pub const MetadataDepositBase: Balance = 10 * UNIT;
+	pub const MetadataDepositPerByte: Balance = 1 * UNIT;
+}
+
+impl pallet_assets::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Balance = u128;
+	type AssetId = u32;
+	type AssetIdParameter = parity_scale_codec::Compact<u32>;
+	type Currency = Balances;
+	type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
+	type ForceOrigin = EnsureRoot<AccountId>;
+	type AssetDeposit = AssetDeposit;
+	type AssetAccountDeposit = ConstU128<UNIT>;
+	type MetadataDepositBase = MetadataDepositBase;
+	type MetadataDepositPerByte = MetadataDepositPerByte;
+	type ApprovalDeposit = ApprovalDeposit;
+	type StringLimit = StringLimit;
+	type Freezer = ();
+	type Extra = ();
+	type CallbackHandle = ();
+	type WeightInfo = pallet_assets::weights::SubstrateWeight<Runtime>;
+	type RemoveItemsLimit = ConstU32<1000>;
+}
+
 parameter_types! {
 	pub const MaxAuthorities: u32 = 100;
 }
@@ -329,6 +364,7 @@ impl pallet_sudo::Config for Runtime {
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime {
+		Assets: pallet_assets,
 		Aura: pallet_aura,
 		Balances: pallet_balances,
 		Cosmos: pallet_cosmos,
