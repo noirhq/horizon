@@ -143,33 +143,34 @@ fn testnet_genesis(
 	_enable_println: bool,
 ) -> RuntimeGenesisConfig {
 	RuntimeGenesisConfig {
-		system: SystemConfig {
-			// Add Wasm runtime to storage.
-			code: wasm_binary.to_vec(),
-			..Default::default()
-		},
 		assets: Default::default(),
+		aura: AuraConfig {
+			authorities: initial_authorities.iter().map(|x| (x.0.clone())).collect(),
+		},
 		balances: BalancesConfig {
 			// Configure endowed accounts with initial balance of (1 << 52) - (1 << 50).
 			balances: endowed_accounts
-				.iter()
-				.cloned()
-				.map(|k| (k, (1 << 52) - (1 << 50)))
-				.collect(),
+			.iter()
+			.cloned()
+			.map(|k| (k, (1 << 52) - (1 << 50)))
+			.collect(),
 		},
 		cosmos_accounts: CosmosAccountsConfig {
 			accounts: endowed_accounts.iter().cloned().map(|k| k.clone()).collect(),
-		},
-		aura: AuraConfig {
-			authorities: initial_authorities.iter().map(|x| (x.0.clone())).collect(),
 		},
 		grandpa: GrandpaConfig {
 			authorities: initial_authorities.iter().map(|x| (x.1.clone(), 1)).collect(),
 			..Default::default()
 		},
+		pool_assets: Default::default(),
 		sudo: SudoConfig {
 			// Assign network admin rights.
 			key: Some(root_key),
+		},
+		system: SystemConfig {
+			// Add Wasm runtime to storage.
+			code: wasm_binary.to_vec(),
+			..Default::default()
 		},
 		transaction_payment: Default::default(),
 	}

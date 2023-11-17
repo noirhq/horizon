@@ -29,7 +29,7 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 mod compat;
 
 use frame_support::{
-	construct_runtime, parameter_types,
+	construct_runtime, ord_parameter_types, parameter_types,
 	traits::{
 		tokens::{fungible, Fortitude, Preservation},
 		AsEnsureOriginWithArg, ConstBool, ConstU32, ConstU8, OnTimestampSet,
@@ -38,9 +38,11 @@ use frame_support::{
 		constants::{RocksDbWeight as RuntimeDbWeight, WEIGHT_REF_TIME_PER_MILLIS},
 		IdentityFee, Weight,
 	},
+	PalletId,
 };
-use frame_system::{EnsureRoot, EnsureSigned};
+use frame_system::{EnsureRoot, EnsureSigned, EnsureSignedBy};
 use hp_crypto::EcdsaExt;
+use pallet_assets::{Instance1, Instance2};
 use pallet_cosmos::handler::cosm::MsgHandler;
 use pallet_grandpa::{
 	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
@@ -52,8 +54,8 @@ use sp_core::{crypto::KeyTypeId, ConstU128, OpaqueMetadata, H160};
 use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
 	traits::{
-		AccountIdLookup, BlakeTwo256, Block as BlockT, DispatchInfoOf, Dispatchable,
-		IdentifyAccount, NumberFor, One, PostDispatchInfoOf, Verify,
+		AccountIdConversion, AccountIdLookup, BlakeTwo256, Block as BlockT, DispatchInfoOf,
+		Dispatchable, IdentifyAccount, NumberFor, One, PostDispatchInfoOf, Verify,
 	},
 	transaction_validity::{
 		TransactionSource, TransactionValidity, TransactionValidityError, UnknownTransaction,
@@ -219,7 +221,7 @@ parameter_types! {
 	pub const MetadataDepositPerByte: Balance = 1 * UNIT;
 }
 
-impl pallet_assets::Config for Runtime {
+impl pallet_assets::Config<Instance1> for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Balance = u128;
 	type AssetId = u32;
@@ -238,6 +240,35 @@ impl pallet_assets::Config for Runtime {
 	type CallbackHandle = ();
 	type WeightInfo = pallet_assets::weights::SubstrateWeight<Runtime>;
 	type RemoveItemsLimit = ConstU32<1000>;
+}
+
+ord_parameter_types! {
+	pub const AssetConversionOrigin: AccountId = AccountIdConversion::<AccountId>::into_account_truncating(&AssetConversionPalletId::get());
+}
+
+parameter_types! {
+	pub const AssetConversionPalletId: PalletId = PalletId(*b"py/ascon");
+}
+
+impl pallet_assets::Config<Instance2> for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Balance = u128;
+	type AssetId = u32;
+	type AssetIdParameter = parity_scale_codec::Compact<u32>;
+	type Currency = Balances;
+	type CreateOrigin = AsEnsureOriginWithArg<EnsureSignedBy<AssetConversionOrigin, AccountId>>;
+	type ForceOrigin = EnsureRoot<AccountId>;
+	type AssetDeposit = AssetDeposit;
+	type AssetAccountDeposit = ConstU128<UNIT>;
+	type MetadataDepositBase = MetadataDepositBase;
+	type MetadataDepositPerByte = MetadataDepositPerByte;
+	type ApprovalDeposit = ApprovalDeposit;
+	type StringLimit = StringLimit;
+	type Freezer = ();
+	type Extra = ();
+	type WeightInfo = pallet_assets::weights::SubstrateWeight<Runtime>;
+	type RemoveItemsLimit = ConstU32<1000>;
+	type CallbackHandle = ();
 }
 
 parameter_types! {
@@ -364,12 +395,13 @@ impl pallet_sudo::Config for Runtime {
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime {
-		Assets: pallet_assets,
+		Assets: pallet_assets::<Instance1>,
 		Aura: pallet_aura,
 		Balances: pallet_balances,
 		Cosmos: pallet_cosmos,
 		CosmosAccounts: pallet_cosmos_accounts,
 		Grandpa: pallet_grandpa,
+		PoolAssets: pallet_assets::<Instance2>,
 		Sudo: pallet_sudo,
 		System: frame_system,
 		Timestamp: pallet_timestamp,
