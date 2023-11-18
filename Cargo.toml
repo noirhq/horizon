@@ -29,12 +29,16 @@ secp256k1 = { version = "0.24.0", default-features = false }
 serde = { version = "1.0.0", default-features = false }
 serde_json = { version = "1.0.94", default-features = false }
 
+# pallet-asset-conversion: turn on "num-traits" feature
+primitive-types = { version = "0.12.0", default-features = false, features = ["codec", "scale-info", "num-traits"] }
+
 # Substrate FRAME
 frame-executive = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
 frame-support = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
 frame-system = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
 frame-system-rpc-runtime-api = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
 pallet-assets = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
+pallet-asset-conversion = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
 pallet-aura = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
 pallet-balances = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
 pallet-grandpa = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }

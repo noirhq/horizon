@@ -42,6 +42,7 @@ use frame_support::{
 };
 use frame_system::{EnsureRoot, EnsureSigned, EnsureSignedBy};
 use hp_crypto::EcdsaExt;
+use pallet_asset_conversion::{NativeOrAssetId, NativeOrAssetIdConverter};
 use pallet_assets::{Instance1, Instance2};
 use pallet_cosmos::handler::cosm::MsgHandler;
 use pallet_grandpa::{
@@ -60,7 +61,7 @@ use sp_runtime::{
 	transaction_validity::{
 		TransactionSource, TransactionValidity, TransactionValidityError, UnknownTransaction,
 	},
-	ApplyExtrinsicResult, Perbill,
+	ApplyExtrinsicResult, Perbill, Permill,
 };
 use sp_std::{marker::PhantomData, prelude::*};
 #[cfg(feature = "std")]
@@ -272,6 +273,36 @@ impl pallet_assets::Config<Instance2> for Runtime {
 }
 
 parameter_types! {
+	pub AllowMultiAssetPools: bool = true;
+	pub const PoolSetupFee: Balance = 1 * UNIT; // should be more or equal to the existential deposit
+	pub const MintMinLiquidity: Balance = 100;  // 100 is good enough when the main currency has 10-12 decimals.
+	pub const LiquidityWithdrawalFee: Permill = Permill::from_percent(0);  // should be non-zero if AllowMultiAssetPools is true, otherwise can be zero.
+}
+
+impl pallet_asset_conversion::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Currency = Balances;
+	type AssetBalance = <Self as pallet_balances::Config>::Balance;
+	type HigherPrecisionBalance = sp_core::U256;
+	type Assets = Assets;
+	type Balance = u128;
+	type PoolAssets = PoolAssets;
+	type AssetId = <Self as pallet_assets::Config<Instance1>>::AssetId;
+	type MultiAssetId = NativeOrAssetId<u32>;
+	type PoolAssetId = <Self as pallet_assets::Config<Instance2>>::AssetId;
+	type PalletId = AssetConversionPalletId;
+	type LPFee = ConstU32<3>; // means 0.3%
+	type PoolSetupFee = PoolSetupFee;
+	type PoolSetupFeeReceiver = AssetConversionOrigin;
+	type LiquidityWithdrawalFee = LiquidityWithdrawalFee;
+	type WeightInfo = pallet_asset_conversion::weights::SubstrateWeight<Runtime>;
+	type AllowMultiAssetPools = AllowMultiAssetPools;
+	type MaxSwapPathLength = ConstU32<4>;
+	type MintMinLiquidity = MintMinLiquidity;
+	type MultiAssetIdConverter = NativeOrAssetIdConverter<u32>;
+}
+
+parameter_types! {
 	pub const MaxAuthorities: u32 = 100;
 }
 
@@ -396,6 +427,7 @@ impl pallet_sudo::Config for Runtime {
 construct_runtime!(
 	pub enum Runtime {
 		Assets: pallet_assets::<Instance1>,
+		AssetConversion: pallet_asset_conversion,
 		Aura: pallet_aura,
 		Balances: pallet_balances,
 		Cosmos: pallet_cosmos,

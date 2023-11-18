@@ -11,6 +11,7 @@ targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
 parity-scale-codec = { workspace = true }
+primitive-types = { workspace = true }
 scale-info = { workspace = true }
 
 # Substrate
@@ -32,6 +33,7 @@ frame-support = { workspace = true }
 frame-system = { workspace = true }
 frame-system-rpc-runtime-api = { workspace = true }
 pallet-assets = { workspace = true }
+pallet-asset-conversion = { workspace = true }
 pallet-aura = { workspace = true }
 pallet-balances = { workspace = true }
 pallet-grandpa = { workspace = true }
@@ -74,6 +76,7 @@ std = [
   "frame-system/std",
   "frame-system-rpc-runtime-api/std",
   "pallet-assets/std",
+  "pallet-asset-conversion/std",
   "pallet-aura/std",
   "pallet-balances/std",
   "pallet-grandpa/std",

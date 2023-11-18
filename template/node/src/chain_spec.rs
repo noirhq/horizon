@@ -150,10 +150,10 @@ fn testnet_genesis(
 		balances: BalancesConfig {
 			// Configure endowed accounts with initial balance of (1 << 52) - (1 << 50).
 			balances: endowed_accounts
-			.iter()
-			.cloned()
-			.map(|k| (k, (1 << 52) - (1 << 50)))
-			.collect(),
+				.iter()
+				.cloned()
+				.map(|k| (k, (1 << 52) - (1 << 50)))
+				.collect(),
 		},
 		cosmos_accounts: CosmosAccountsConfig {
 			accounts: endowed_accounts.iter().cloned().map(|k| k.clone()).collect(),
