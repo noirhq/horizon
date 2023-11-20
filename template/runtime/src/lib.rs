@@ -392,6 +392,8 @@ impl pallet_timestamp::Config for Runtime {
 }
 
 impl pallet_cosmos::Config for Runtime {
+	/// Assets type for fungible tokens.
+	type Assets = Assets;
 	/// Mapping from address to account id.
 	type AddressMapping = compat::cosm::HashedAddressMapping<Self, BlakeTwo256>;
 	/// Currency type for withdraw and balance storage.

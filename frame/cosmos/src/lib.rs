@@ -165,7 +165,10 @@ pub trait EnsureAddressOrigin<OuterOrigin> {
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
-	use frame_support::pallet_prelude::*;
+	use frame_support::{
+		pallet_prelude::*,
+		traits::fungibles::{Balanced, Mutate},
+	};
 
 	#[pallet::pallet]
 	#[pallet::without_storage_info]
@@ -180,6 +183,8 @@ pub mod pallet {
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
+		/// Assets type for fungible tokens.
+		type Assets: Balanced<Self::AccountId> + Mutate<Self::AccountId>;
 		/// Mapping from address to account id.
 		type AddressMapping: AddressMapping<Self::AccountId>;
 		/// Currency type for withdraw and balance storage.
