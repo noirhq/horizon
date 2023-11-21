@@ -61,7 +61,7 @@ use sp_runtime::{
 	transaction_validity::{
 		TransactionSource, TransactionValidity, TransactionValidityError, UnknownTransaction,
 	},
-	ApplyExtrinsicResult, Perbill, Permill,
+	ApplyExtrinsicResult, BoundedVec, Perbill, Permill,
 };
 use sp_std::{marker::PhantomData, prelude::*};
 #[cfg(feature = "std")]
@@ -391,6 +391,10 @@ impl pallet_timestamp::Config for Runtime {
 	type WeightInfo = ();
 }
 
+parameter_types! {
+	pub NativeDenom: BoundedVec<u8, StringLimit> = (*b"atom").to_vec().try_into().unwrap();
+}
+
 impl pallet_cosmos::Config for Runtime {
 	/// Assets type for fungible tokens.
 	type Assets = Assets;
@@ -402,8 +406,12 @@ impl pallet_cosmos::Config for Runtime {
 	type MsgHandler = MsgHandler<Self>;
 	/// Convert a length value into a deductible fee based on the currency type.
 	type LengthToFee = IdentityFee<Balance>;
+	/// Native balance denom.
+	type NativeDenom = NativeDenom;
 	/// The overarching event type.
 	type RuntimeEvent = RuntimeEvent;
+	/// The maximum length of a name or symbol stored on-chain.
+	type StringLimit = StringLimit;
 	/// Weight information for extrinsics in this pallet.
 	type WeightInfo = pallet_cosmos::weights::HorizonWeight<Runtime>;
 	/// Used to calculate actual fee when executing cosmos transaction.

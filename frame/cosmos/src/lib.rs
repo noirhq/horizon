@@ -193,8 +193,14 @@ pub mod pallet {
 		type MsgHandler: MsgHandler<Self>;
 		/// Convert a length value into a deductible fee based on the currency type.
 		type LengthToFee: WeightToFee<Balance = BalanceOf<Self>>;
+		/// Native balance denom.
+		#[pallet::constant]
+		type NativeDenom: Get<BoundedVec<u8, Self::StringLimit>>;
 		/// The overarching event type.
 		type RuntimeEvent: From<Event> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
+		/// The maximum length of a name or symbol stored on-chain.
+		#[pallet::constant]
+		type StringLimit: Get<u32>;
 		/// Weight information for extrinsics in this pallet.
 		type WeightInfo: WeightInfo;
 		/// Used to answer contracts' queries regarding the current weight price. This is **not**
