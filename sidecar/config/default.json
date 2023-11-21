@@ -13,7 +13,7 @@
     "moniker": "cosmos",
     "name": "horizon",
     "version": "1",
-    "denom": "acdt",
+    "denom": "uatom",
     "node": "horizon"
   }
 }

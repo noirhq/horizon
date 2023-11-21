@@ -1,14 +1,13 @@
 import { ApiPromise } from "@pinot/api";
 import { AccountResponse } from "../types/index.js";
 import { fromBech32 } from "@cosmjs/encoding";
-import { Codec } from "@polkadot/types/types/index.js";
 import { blake2b } from "ethereum-cryptography/blake2b.js";
 import { ApiService } from "./service.js";
 import Dummy from "../constants/dummy.js";
 
 export interface IAccountService extends ApiService {
   accounts(address: string): Promise<AccountResponse>;
-  origin(address: string): Promise<Codec>;
+  origin(address: string): Promise<any>;
   interim(address: string): string;
 }
 
@@ -53,7 +52,7 @@ export class HorizonAccountService implements IAccountService {
     });
   }
 
-  public async origin(address: string): Promise<Codec> {
+  public async origin(address: string): Promise<any> {
     const { data } = fromBech32(address);
     return this.chainApi.query["cosmosAccounts"]["connections"](data);
   }
@@ -106,7 +105,7 @@ export class NoirAccountService implements IAccountService {
     });
   }
 
-  public async origin(address: string): Promise<Codec> {
+  public async origin(address: string): Promise<any> {
     const { data } = fromBech32(address);
     const addressRaw = Buffer.concat([Buffer.from([0x02]), data]);
     return this.chainApi.query["alias"]["accountIdOf"](

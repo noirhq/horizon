@@ -45,7 +45,7 @@ use sp_runtime::{
 	transaction_validity::{
 		InvalidTransaction, TransactionValidity, TransactionValidityError, ValidTransactionBuilder,
 	},
-	RuntimeDebug,
+	BoundedVec, RuntimeDebug,
 };
 use sp_std::{marker::PhantomData, vec::Vec};
 pub use weights::*;
@@ -363,12 +363,21 @@ impl<T: Config> Pallet<T> {
 						error: CosmosErrorCode::ErrUnauthorized,
 					})
 				}
-				let weight = T::MsgHandler::msg_send(from_address, to_address, amount[0].amount)
-					.map_err(|e| CosmosError {
-						weight: total_weight.saturating_add(e.weight),
-						error: e.error,
-					})?;
-				total_weight = total_weight.saturating_add(weight);
+				if amount[0].denom == T::NativeDenom::get().to_vec() {
+					let weight =
+						T::MsgHandler::msg_send(from_address, to_address, amount[0].amount)
+							.map_err(|e| CosmosError {
+								weight: total_weight.saturating_add(e.weight),
+								error: e.error,
+							})?;
+					total_weight = total_weight.saturating_add(weight);
+				} else {
+					// todo
+					return Err(CosmosError {
+						weight: total_weight,
+						error: CosmosErrorCode::ErrDenomMetadataNotFound,
+					})
+				}
 			},
 		};
 

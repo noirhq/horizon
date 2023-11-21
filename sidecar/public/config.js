@@ -2,8 +2,8 @@ const config = {
 	chainId: "dev",
 	chainName: "Horizon",
 	addressPrefix: "cosmos",
-	baseDenom: "acdt", // atto cdt
-	displayDenom: "CDT",
+	baseDenom: "uatom",
+	displayDenom: "ATOM",
 	restURL: "http://127.0.0.1:1317",
 	coinType: "118",
 	decimals: 18,

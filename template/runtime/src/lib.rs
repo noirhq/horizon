@@ -392,7 +392,7 @@ impl pallet_timestamp::Config for Runtime {
 }
 
 parameter_types! {
-	pub NativeDenom: BoundedVec<u8, StringLimit> = (*b"atom").to_vec().try_into().unwrap();
+	pub NativeDenom: BoundedVec<u8, StringLimit> = (*b"uatom").to_vec().try_into().unwrap();
 }
 
 impl pallet_cosmos::Config for Runtime {

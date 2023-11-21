@@ -28,13 +28,15 @@ pub struct CosmosError {
 pub enum CosmosErrorCode {
 	// ErrUnauthorized is used whenever a request without sufficient
 	// authorization is handled.
-	ErrUnauthorized = 4,
+	ErrUnauthorized = 1,
 	// ErrInsufficientFunds is used when the account cannot pay requested amount.
-	ErrInsufficientFunds = 5,
+	ErrInsufficientFunds = 2,
 	// ErrOutOfGas to doc
-	ErrOutOfGas = 11,
+	ErrOutOfGas = 3,
 	// ErrInsufficientFee to doc
-	ErrInsufficientFee = 13,
+	ErrInsufficientFee = 4,
 	// ErrInvalidType defines an error an invalid type.
-	ErrInvalidType = 29,
+	ErrInvalidType = 5,
+	// ErrDenomMetadataNotFound
+	ErrDenomMetadataNotFound = 6,
 }
