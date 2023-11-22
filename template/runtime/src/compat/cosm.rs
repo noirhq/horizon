@@ -34,7 +34,7 @@ where
 	H: Hasher<Out = H256>,
 {
 	fn into_account_id(address: H160) -> T::AccountId {
-		if let Some(x) = pallet_cosmos_accounts::Connections::<T>::get(address) {
+		if let Some(x) = pallet_cosmos_accounts::AccountOf::<T>::get(address) {
 			return x
 		}
 		let mut data = [0u8; 25];

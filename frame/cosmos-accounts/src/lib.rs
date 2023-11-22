@@ -60,7 +60,7 @@ pub mod pallet {
 	}
 
 	#[pallet::storage]
-	pub type Connections<T: Config> = StorageMap<_, Blake2_128Concat, H160, T::AccountId>;
+	pub type AccountOf<T: Config> = StorageMap<_, Blake2_128Concat, H160, T::AccountId>;
 
 	#[pallet::genesis_config]
 	pub struct GenesisConfig<T: Config> {
@@ -105,7 +105,7 @@ pub mod pallet {
 	{
 		pub fn connect_account(who: &T::AccountId) -> Result<(), DispatchError> {
 			let address = who.to_cosm_address().ok_or(Error::<T>::DeriveFailed)?;
-			Connections::<T>::insert(&address, &who);
+			AccountOf::<T>::insert(&address, &who);
 			Self::deposit_event(Event::<T>::Connected { address, who: who.clone() });
 			Ok(())
 		}

@@ -54,7 +54,7 @@ export class HorizonAccountService implements IAccountService {
 
   public async origin(address: string): Promise<any> {
     const { data } = fromBech32(address);
-    return this.chainApi.query["cosmosAccounts"]["connections"](data);
+    return this.chainApi.query["cosmosAccounts"]["accountOf"](data);
   }
 
   public interim(address: string): string {
