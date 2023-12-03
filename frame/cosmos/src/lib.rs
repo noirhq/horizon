@@ -20,6 +20,7 @@
 #![allow(clippy::comparison_chain, clippy::large_enum_variant)]
 #![deny(unused_crate_dependencies)]
 
+pub mod asset;
 pub mod errors;
 pub mod handler;
 pub mod weights;
@@ -32,7 +33,9 @@ use frame_support::{
 	pallet_prelude::{DispatchClass, DispatchResultWithPostInfo, Pays},
 	scale_info::TypeInfo,
 	traits::{
-		tokens::{fungible::Inspect, Fortitude, Preservation},
+		tokens::{
+			fungible::Inspect as FungibleInspect, fungibles::Inspect, Fortitude, Preservation,
+		},
 		Currency, ExistenceRequirement, Get, WithdrawReasons,
 	},
 	weights::{Weight, WeightToFee},
@@ -165,9 +168,13 @@ pub trait EnsureAddressOrigin<OuterOrigin> {
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
+	use asset::DenomAssetConverter;
 	use frame_support::{
 		pallet_prelude::*,
-		traits::fungibles::{Balanced, Mutate},
+		traits::{
+			fungibles::{Balanced, Mutate},
+			tokens::{AssetId, Balance},
+		},
 	};
 
 	#[pallet::pallet]
@@ -183,12 +190,19 @@ pub mod pallet {
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
+		/// The type used to define Assets.
+		type AssetBalance: Balance;
+		/// Identifier for the class of non-native asset.
+		type AssetId: AssetId;
 		/// Assets type for fungible tokens.
-		type Assets: Balanced<Self::AccountId> + Mutate<Self::AccountId>;
+		type Assets: Inspect<Self::AccountId, AssetId = Self::AssetId, Balance = Self::AssetBalance>
+			+ Balanced<Self::AccountId>
+			+ Mutate<Self::AccountId>;
+		type DenomAssetConverter: DenomAssetConverter<Self>;
 		/// Mapping from address to account id.
 		type AddressMapping: AddressMapping<Self::AccountId>;
 		/// Currency type for withdraw and balance storage.
-		type Currency: Currency<Self::AccountId> + Inspect<Self::AccountId>;
+		type Currency: Currency<Self::AccountId> + FungibleInspect<Self::AccountId>;
 		/// Handle cosmos messages.
 		type MsgHandler: MsgHandler<Self>;
 		/// Convert a length value into a deductible fee based on the currency type.
