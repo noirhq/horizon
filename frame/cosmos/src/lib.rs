@@ -190,15 +190,16 @@ pub mod pallet {
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
-		/// The type used to define Assets.
+		/// The balance type of assets.
 		type AssetBalance: Balance;
-		/// Identifier for the class of non-native asset.
+		/// The identifier of assets.
 		type AssetId: AssetId;
 		/// Assets type for fungible tokens.
 		type Assets: Inspect<Self::AccountId, AssetId = Self::AssetId, Balance = Self::AssetBalance>
 			+ Balanced<Self::AccountId>
 			+ Mutate<Self::AccountId>;
-		type DenomAssetConverter: DenomAssetConverter<Self>;
+		/// Converter between cosmos denom and substrate asset id.
+		type DenomAssetConverter: DenomAssetConverter<Self::AssetId, Vec<u8>>;
 		/// Mapping from address to account id.
 		type AddressMapping: AddressMapping<Self::AccountId>;
 		/// Currency type for withdraw and balance storage.

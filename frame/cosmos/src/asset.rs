@@ -16,11 +16,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::Config;
+use frame_support::traits::tokens::AssetId;
 
-pub trait DenomAssetConverter<T: Config> {
+pub trait DenomAssetConverter<A: AssetId, D> {
 	/// Convert asset id to denom.
-	fn to_denom(asset_id: T::AssetId) -> Vec<u8>;
+	fn to_denom(asset_id: A) -> D;
 	/// Convert denom to asset id.
-	fn to_asset_id(denom: Vec<u8>) -> T::AssetId;
+	fn to_asset_id(denom: D) -> A;
 }

@@ -225,8 +225,8 @@ parameter_types! {
 impl pallet_assets::Config<Instance1> for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Balance = u128;
-	type AssetId = u32;
-	type AssetIdParameter = parity_scale_codec::Compact<u32>;
+	type AssetId = u128;
+	type AssetIdParameter = parity_scale_codec::Compact<u128>;
 	type Currency = Balances;
 	type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
 	type ForceOrigin = EnsureRoot<AccountId>;
@@ -288,7 +288,7 @@ impl pallet_asset_conversion::Config for Runtime {
 	type Balance = u128;
 	type PoolAssets = PoolAssets;
 	type AssetId = <Self as pallet_assets::Config<Instance1>>::AssetId;
-	type MultiAssetId = NativeOrAssetId<u32>;
+	type MultiAssetId = NativeOrAssetId<u128>;
 	type PoolAssetId = <Self as pallet_assets::Config<Instance2>>::AssetId;
 	type PalletId = AssetConversionPalletId;
 	type LPFee = ConstU32<3>; // means 0.3%
@@ -299,7 +299,7 @@ impl pallet_asset_conversion::Config for Runtime {
 	type AllowMultiAssetPools = AllowMultiAssetPools;
 	type MaxSwapPathLength = ConstU32<4>;
 	type MintMinLiquidity = MintMinLiquidity;
-	type MultiAssetIdConverter = NativeOrAssetIdConverter<u32>;
+	type MultiAssetIdConverter = NativeOrAssetIdConverter<u128>;
 }
 
 parameter_types! {
@@ -396,12 +396,18 @@ parameter_types! {
 }
 
 impl pallet_cosmos::Config for Runtime {
+	/// The balance type of assets.
+	type AssetBalance = <Self as pallet_assets::Config<Instance1>>::Balance;
+	/// The identifier of assets.
+	type AssetId = <Self as pallet_assets::Config<Instance1>>::AssetId;
 	/// Assets type for fungible tokens.
 	type Assets = Assets;
 	/// Mapping from address to account id.
 	type AddressMapping = compat::cosm::HashedAddressMapping<Self, BlakeTwo256>;
 	/// Currency type for withdraw and balance storage.
 	type Currency = Balances;
+	/// Converter between cosmos denom and substrate asset id.
+	type DenomAssetConverter = ();
 	/// Handle cosmos messages.
 	type MsgHandler = MsgHandler<Self>;
 	/// Convert a length value into a deductible fee based on the currency type.
