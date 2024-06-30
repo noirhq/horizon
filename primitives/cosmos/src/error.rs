@@ -47,3 +47,10 @@ impl Display for DecodeTxError {
 		}
 	}
 }
+
+#[derive(Copy, Clone, Debug)]
+pub enum DecodeMsgError {
+	InvalidTypeUrl,
+	UnsupportedType,
+	InvalidValue,
+}

@@ -46,9 +46,11 @@ pub trait DecodeTx {
 	}
 }
 
+/// Interface for decoding Msg encoded with Protobuf and then re-encoding it with Scale
 #[runtime_interface]
 pub trait ProtobufToScale {
+	/// Converting a message from Protobuf encoding to Scale encoding
 	fn to_scale(type_url: &[u8], value: &[u8]) -> Option<(Vec<u8>, Vec<u8>)> {
-		hp_cosmos::msgs::to_scale(type_url, value)
+		hp_cosmos::msgs::to_scale(type_url, value).ok()
 	}
 }

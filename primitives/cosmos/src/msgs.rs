@@ -15,7 +15,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{AccountId, Any, Coin};
+use crate::{error::DecodeMsgError, AccountId, Any, Coin};
 #[cfg(feature = "std")]
 use cosmrs::tx::Msg;
 #[cfg(feature = "with-codec")]
@@ -38,16 +38,18 @@ pub struct MsgSend {
 
 #[cfg(feature = "std")]
 impl TryFrom<Any> for MsgSend {
-	type Error = ();
+	type Error = DecodeMsgError;
 
 	fn try_from(msg: Any) -> Result<Self, Self::Error> {
-		let type_url = String::from_utf8(msg.type_url).map_err(|_| ())?;
+		let type_url =
+			String::from_utf8(msg.type_url).map_err(|_| DecodeMsgError::InvalidTypeUrl)?;
 		if type_url != "/cosmos.bank.v1beta1.MsgSend" {
-			return Err(());
+			return Err(DecodeMsgError::UnsupportedType);
 		}
 
 		let any = cosmrs::Any { type_url, value: msg.value };
-		let msg_send = cosmrs::bank::MsgSend::from_any(&any).map_err(|_| ())?;
+		let msg_send =
+			cosmrs::bank::MsgSend::from_any(&any).map_err(|_| DecodeMsgError::InvalidValue)?;
 
 		let from_address = msg_send.from_address.into();
 		let to_address = msg_send.to_address.into();
@@ -58,13 +60,13 @@ impl TryFrom<Any> for MsgSend {
 }
 
 #[cfg(feature = "std")]
-pub fn to_scale(type_url: &[u8], value: &[u8]) -> Option<(Vec<u8>, Vec<u8>)> {
-	match String::from_utf8(type_url.to_vec()).ok()?.as_ref() {
+pub fn to_scale(type_url: &[u8], value: &[u8]) -> Result<(Vec<u8>, Vec<u8>), DecodeMsgError> {
+	match core::str::from_utf8(type_url).map_err(|_| DecodeMsgError::InvalidTypeUrl)? {
 		"/cosmos.bank.v1beta1.MsgSend" => {
 			let any = Any { type_url: type_url.to_vec(), value: value.to_vec() };
-			let msg_send: MsgSend = any.try_into().ok()?;
-			Some((type_url.to_vec(), msg_send.encode()))
+			let msg_send: MsgSend = any.try_into()?;
+			Ok((type_url.to_vec(), msg_send.encode()))
 		},
-		_ => None,
+		_ => Err(DecodeMsgError::InvalidTypeUrl),
 	}
 }

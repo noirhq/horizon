@@ -31,8 +31,7 @@ where
 	fn route(type_url: &[u8], value: &[u8]) -> Result<Weight, Self::Error> {
 		match core::str::from_utf8(type_url).map_err(|_| ())? {
 			"/cosmos.bank.v1beta1.MsgSend" => {
-				let (type_url, value) =
-					hp_io::protobuf_to_scale::to_scale(type_url, value).unwrap();
+				let (_, value) = hp_io::protobuf_to_scale::to_scale(type_url, value).unwrap();
 				let msg: MsgSend = Decode::decode(&mut &value[..]).unwrap();
 				pallet_cosmos_bank::msgs::MsgServer::<T>::send(msg)
 			},
