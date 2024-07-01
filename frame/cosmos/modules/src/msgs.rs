@@ -16,12 +16,18 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::handlers::MsgHandler;
+use hp_cosmos::Any;
+use sp_runtime::RuntimeString;
+
+pub enum MsgHandlerError {
+	InvalidMsg,
+	Custom(RuntimeString),
+}
+
+pub trait MsgHandler {
+	fn handle(&self, msg: &Any) -> Result<(), MsgHandlerError>;
+}
 
 pub trait MsgServiceRouter {
-	type Error: core::fmt::Debug;
-
-	fn route(
-		type_url: &[u8],
-	) -> Result<sp_std::boxed::Box<dyn MsgHandler<Error = Self::Error>>, Self::Error>;
+	fn route(type_url: &[u8]) -> Option<sp_std::boxed::Box<dyn MsgHandler>>;
 }

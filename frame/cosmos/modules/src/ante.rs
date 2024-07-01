@@ -17,14 +17,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 use frame_support::pallet_prelude::*;
-use hp_cosmos::{Any, Tx};
+use hp_cosmos::Tx;
 
 pub trait AnteHandler {
 	fn handle(tx: &Tx) -> Result<(), TransactionValidityError>;
-}
-
-pub trait MsgHandler {
-	type Error;
-
-	fn handle(&self, msg: &Any) -> Result<Weight, Self::Error>;
 }

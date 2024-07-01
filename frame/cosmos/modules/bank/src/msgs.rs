@@ -22,7 +22,8 @@ use frame_support::{
 };
 use hp_cosmos::{msgs::MsgSend, Any};
 use pallet_cosmos::AddressMapping;
-use sp_runtime::SaturatedConversion;
+use pallet_cosmos_modules::MsgHandlerError;
+use sp_runtime::{format_runtime_string, SaturatedConversion};
 
 pub struct MsgSendHandler<T>(PhantomData<T>);
 
@@ -36,11 +37,11 @@ impl<T> pallet_cosmos_modules::MsgHandler for MsgSendHandler<T>
 where
 	T: pallet_cosmos::Config,
 {
-	type Error = ();
-
-	fn handle(&self, msg: &Any) -> Result<Weight, Self::Error> {
-		let (_, value) = hp_io::protobuf_to_scale::to_scale(&msg.type_url, &msg.type_url).unwrap();
-		let MsgSend { from_address, to_address, amount } = Decode::decode(&mut &value[..]).unwrap();
+	fn handle(&self, msg: &Any) -> Result<(), MsgHandlerError> {
+		let (_, value) = hp_io::protobuf_to_scale::to_scale(&msg.type_url, &msg.type_url)
+			.ok_or(MsgHandlerError::InvalidMsg)?;
+		let MsgSend { from_address, to_address, amount } =
+			Decode::decode(&mut &value[..]).map_err(|_| MsgHandlerError::InvalidMsg)?;
 
 		let from = T::AddressMapping::into_account_id(from_address.address);
 		let to = T::AddressMapping::into_account_id(to_address.address);
@@ -53,12 +54,14 @@ where
 					amt.amount.saturated_into(),
 					ExistenceRequirement::AllowDeath,
 				)
-				.map_err(|_| ())?;
+				.map_err(|_| {
+					MsgHandlerError::Custom(format_runtime_string!("Failed to transfer"))
+				})?;
 			} else {
 				// TODO: Asset support planned
-				return Err(());
+				return Err(MsgHandlerError::InvalidMsg);
 			}
 		}
-		Ok(Weight::zero())
+		Ok(())
 	}
 }

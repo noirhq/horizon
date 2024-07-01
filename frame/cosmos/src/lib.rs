@@ -303,7 +303,7 @@ impl<T: Config> Pallet<T> {
 			let handler = T::MsgServiceRouter::route(&msg.type_url).unwrap();
 			let result = handler.handle(msg);
 		}
-		Ok(PostDispatchInfo { actual_weight: Some(Weight::zero()), pays_fee: Pays::Yes })
+		Ok(PostDispatchInfo { actual_weight: Some(total_weight), pays_fee: Pays::Yes })
 	}
 
 	/// Get the base account info.

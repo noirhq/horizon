@@ -11,6 +11,7 @@ targets = ["x86_64-unknown-linux-gnu"]
 [dependencies]
 frame-support = { workspace = true }
 sp-runtime = { workspace = true }
+sp-std = { workspace = true }
 
 hp-cosmos = { workspace = true }
 hp-io = { workspace = true }
@@ -22,6 +23,7 @@ default = ["std"]
 std = [
 	"frame-support/std",
 	"sp-runtime/std",
+	"sp-std/std",
 	"hp-cosmos/std",
 	"hp-io/std",
 	"pallet-cosmos/std",

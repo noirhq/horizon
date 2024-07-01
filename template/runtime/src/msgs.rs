@@ -24,15 +24,11 @@ impl<T> pallet_cosmos_modules::MsgServiceRouter for MsgServiceRouter<T>
 where
 	T: frame_system::Config + pallet_cosmos::Config,
 {
-	type Error = ();
-
-	fn route(
-		type_url: &[u8],
-	) -> Result<sp_std::boxed::Box<dyn MsgHandler<Error = Self::Error>>, Self::Error> {
+	fn route(type_url: &[u8]) -> Option<sp_std::boxed::Box<dyn MsgHandler>> {
 		match core::str::from_utf8(type_url).unwrap() {
 			"/cosmos.bank.v1beta1.MsgSend" =>
-				Ok(sp_std::boxed::Box::<MsgSendHandler<T>>::default()),
-			_ => Err(()),
+				Some(sp_std::boxed::Box::<MsgSendHandler<T>>::default()),
+			_ => None,
 		}
 	}
 }

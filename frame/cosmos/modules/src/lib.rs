@@ -19,8 +19,8 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(clippy::comparison_chain, clippy::large_enum_variant)]
 
-mod handlers;
+mod ante;
 mod msgs;
 
-pub use handlers::{AnteHandler, MsgHandler};
-pub use msgs::MsgServiceRouter;
+pub use ante::AnteHandler;
+pub use msgs::{MsgHandler, MsgHandlerError, MsgServiceRouter};
