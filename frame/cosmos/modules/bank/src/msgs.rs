@@ -20,18 +20,27 @@ use frame_support::{
 	pallet_prelude::*,
 	traits::{Currency, ExistenceRequirement},
 };
-use hp_cosmos::msgs::MsgSend;
+use hp_cosmos::{msgs::MsgSend, Any};
 use pallet_cosmos::AddressMapping;
 use sp_runtime::SaturatedConversion;
 
-pub struct MsgServer<T>(PhantomData<T>);
+pub struct MsgSendHandler<T>(PhantomData<T>);
 
-impl<T> MsgServer<T>
+impl<T> MsgSendHandler<T> {
+	pub fn new() -> Self {
+		Self(Default::default())
+	}
+}
+
+impl<T> pallet_cosmos_modules::MsgHandler for MsgSendHandler<T>
 where
 	T: pallet_cosmos::Config,
 {
-	pub fn send(msg: MsgSend) -> Result<Weight, ()> {
-		let MsgSend { from_address, to_address, amount } = msg;
+	type Error = ();
+
+	fn handle(&self, msg: &Any) -> Result<Weight, Self::Error> {
+		let (_, value) = hp_io::protobuf_to_scale::to_scale(&msg.type_url, &msg.type_url).unwrap();
+		let MsgSend { from_address, to_address, amount } = Decode::decode(&mut &value[..]).unwrap();
 
 		let from = T::AddressMapping::into_account_id(from_address.address);
 		let to = T::AddressMapping::into_account_id(to_address.address);

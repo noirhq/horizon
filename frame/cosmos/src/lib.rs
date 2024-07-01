@@ -200,12 +200,12 @@ pub mod pallet {
 		type MaxMemoCharacters: Get<u64>;
 
 		#[pallet::constant]
-		type NativeDenom: Get<BoundedVec<u8, Self::DenomMaxLen>>;
+		type NativeDenom: Get<BoundedVec<u8, Self::StringLimit>>;
 
 		#[pallet::constant]
-		type DenomMaxLen: Get<u32>;
+		type StringLimit: Get<u32>;
 
-		type MsgServiceRouter: MsgServiceRouter<Self>;
+		type MsgServiceRouter: MsgServiceRouter;
 	}
 
 	#[pallet::event]
@@ -300,7 +300,8 @@ impl<T: Config> Pallet<T> {
 	fn apply_validated_transaction(source: H160, tx: hp_cosmos::Tx) -> DispatchResultWithPostInfo {
 		let mut total_weight = Weight::zero();
 		for msg in tx.body.messages.iter() {
-			let result = T::MsgServiceRouter::route(&msg.type_url, &msg.value);
+			let handler = T::MsgServiceRouter::route(&msg.type_url).unwrap();
+			let result = handler.handle(msg);
 		}
 		Ok(PostDispatchInfo { actual_weight: Some(Weight::zero()), pays_fee: Pays::Yes })
 	}

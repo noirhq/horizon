@@ -22,5 +22,5 @@
 mod handlers;
 mod msgs;
 
-pub use handlers::AnteHandler;
+pub use handlers::{AnteHandler, MsgHandler};
 pub use msgs::MsgServiceRouter;

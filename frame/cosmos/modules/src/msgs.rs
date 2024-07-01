@@ -16,10 +16,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-use frame_support::weights::Weight;
+use crate::handlers::MsgHandler;
 
-pub trait MsgServiceRouter<T> {
-	type Error;
+pub trait MsgServiceRouter {
+	type Error: core::fmt::Debug;
 
-	fn route(type_url: &[u8], value: &[u8]) -> Result<Weight, Self::Error>;
+	fn route(
+		type_url: &[u8],
+	) -> Result<sp_std::boxed::Box<dyn MsgHandler<Error = Self::Error>>, Self::Error>;
 }

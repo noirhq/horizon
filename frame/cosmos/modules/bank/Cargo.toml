@@ -13,7 +13,9 @@ frame-support = { workspace = true }
 sp-runtime = { workspace = true }
 
 hp-cosmos = { workspace = true }
+hp-io = { workspace = true }
 pallet-cosmos = { workspace = true }
+pallet-cosmos-modules = { workspace = true }
 
 [features]
 default = ["std"]
@@ -21,5 +23,7 @@ std = [
 	"frame-support/std",
 	"sp-runtime/std",
 	"hp-cosmos/std",
+	"hp-io/std",
 	"pallet-cosmos/std",
+	"pallet-cosmos-modules/std",
 ]
