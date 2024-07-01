@@ -1,4 +1,4 @@
-// This file is part of Hrozion.
+// This file is part of Horizon.
 
 // Copyright (C) 2023 Haderech Pte. Ltd.
 // SPDX-License-Identifier: GPL-3.0-or-later
@@ -17,23 +17,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 use frame_support::pallet_prelude::*;
-use pallet_cosmos_auth::{
-	SigVerificationDecorator, TxTimeoutHeightDecorator, ValidateBasicDecorator,
-	ValidateMemoDecorator,
-};
-use pallet_cosmos_modules::AnteDecorator;
+use hp_cosmos::Tx;
 
-pub struct AnteDecorators;
-impl<T> pallet_cosmos_modules::AnteDecorators<T> for AnteDecorators
-where
-	T: frame_system::Config + pallet_cosmos::Config,
-{
-	fn ante_handle(tx: &hp_cosmos::Tx) -> Result<(), TransactionValidityError> {
-		ValidateBasicDecorator::<T>::ante_handle(tx)?;
-		TxTimeoutHeightDecorator::<T>::ante_handle(tx)?;
-		ValidateMemoDecorator::<T>::ante_handle(tx)?;
-		SigVerificationDecorator::<T>::ante_handle(tx)?;
-
-		Ok(())
-	}
+pub trait AnteHandler {
+	fn handle(tx: &Tx) -> Result<(), TransactionValidityError>;
 }

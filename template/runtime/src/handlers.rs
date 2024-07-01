@@ -1,4 +1,4 @@
-// This file is part of Horizon.
+// This file is part of Hrozion.
 
 // Copyright (C) 2023 Haderech Pte. Ltd.
 // SPDX-License-Identifier: GPL-3.0-or-later
@@ -17,12 +17,21 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 use frame_support::pallet_prelude::*;
-use hp_cosmos::Tx;
+use pallet_cosmos_auth::{
+	SigVerificationHandler, TxTimeoutHeightHandler, ValidateBasicHandler, ValidateMemoHandler,
+};
 
-pub trait AnteDecorator<T> {
-	fn ante_handle(tx: &Tx) -> Result<(), TransactionValidityError>;
-}
+pub struct AnteHandlers<T>(sp_std::marker::PhantomData<T>);
+impl<T> pallet_cosmos_modules::AnteHandler for AnteHandlers<T>
+where
+	T: frame_system::Config + pallet_cosmos::Config,
+{
+	fn handle(tx: &hp_cosmos::Tx) -> Result<(), TransactionValidityError> {
+		ValidateBasicHandler::<T>::handle(tx)?;
+		TxTimeoutHeightHandler::<T>::handle(tx)?;
+		ValidateMemoHandler::<T>::handle(tx)?;
+		SigVerificationHandler::<T>::handle(tx)?;
 
-pub trait AnteDecorators<T> {
-	fn ante_handle(tx: &Tx) -> Result<(), TransactionValidityError>;
+		Ok(())
+	}
 }

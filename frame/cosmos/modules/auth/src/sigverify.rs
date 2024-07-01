@@ -18,17 +18,17 @@
 
 use hp_cosmos::{PublicKey, SignerPublicKey, Tx};
 use hp_io::crypto::secp256k1_ecdsa_verify;
-use pallet_cosmos_modules::AnteDecorator;
+use pallet_cosmos_modules::AnteHandler;
 use sp_runtime::transaction_validity::{InvalidTransaction, TransactionValidityError};
 use sp_std::marker::PhantomData;
 
-pub struct SigVerificationDecorator<T>(PhantomData<T>);
+pub struct SigVerificationHandler<T>(PhantomData<T>);
 
-impl<T> AnteDecorator<T> for SigVerificationDecorator<T>
+impl<T> AnteHandler for SigVerificationHandler<T>
 where
 	T: frame_system::Config,
 {
-	fn ante_handle(tx: &Tx) -> Result<(), TransactionValidityError> {
+	fn handle(tx: &Tx) -> Result<(), TransactionValidityError> {
 		let signatures = &tx.signatures;
 		let signers = &tx.auth_info.signer_infos;
 

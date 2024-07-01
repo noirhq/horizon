@@ -17,7 +17,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 use hp_cosmos::Tx;
-use pallet_cosmos_modules::AnteDecorator;
+use pallet_cosmos_modules::AnteHandler;
 use sp_runtime::{
 	traits::Get,
 	transaction_validity::{InvalidTransaction, TransactionValidityError},
@@ -25,13 +25,13 @@ use sp_runtime::{
 };
 use sp_std::marker::PhantomData;
 
-pub struct ValidateBasicDecorator<T>(PhantomData<T>);
+pub struct ValidateBasicHandler<T>(PhantomData<T>);
 
-impl<T> AnteDecorator<T> for ValidateBasicDecorator<T>
+impl<T> AnteHandler for ValidateBasicHandler<T>
 where
 	T: frame_system::Config,
 {
-	fn ante_handle(tx: &Tx) -> Result<(), TransactionValidityError> {
+	fn handle(tx: &Tx) -> Result<(), TransactionValidityError> {
 		if tx.signatures.is_empty() {
 			return Err(TransactionValidityError::Invalid(InvalidTransaction::BadProof));
 		}
@@ -43,13 +43,13 @@ where
 	}
 }
 
-pub struct TxTimeoutHeightDecorator<T>(PhantomData<T>);
+pub struct TxTimeoutHeightHandler<T>(PhantomData<T>);
 
-impl<T> AnteDecorator<T> for TxTimeoutHeightDecorator<T>
+impl<T> AnteHandler for TxTimeoutHeightHandler<T>
 where
 	T: frame_system::Config,
 {
-	fn ante_handle(tx: &Tx) -> Result<(), TransactionValidityError> {
+	fn handle(tx: &Tx) -> Result<(), TransactionValidityError> {
 		if tx.body.timeout_height > 0 &&
 			frame_system::Pallet::<T>::block_number().saturated_into::<u64>() >
 				tx.body.timeout_height
@@ -61,13 +61,13 @@ where
 	}
 }
 
-pub struct ValidateMemoDecorator<T>(PhantomData<T>);
+pub struct ValidateMemoHandler<T>(PhantomData<T>);
 
-impl<T> AnteDecorator<T> for ValidateMemoDecorator<T>
+impl<T> AnteHandler for ValidateMemoHandler<T>
 where
 	T: pallet_cosmos::Config,
 {
-	fn ante_handle(tx: &Tx) -> Result<(), TransactionValidityError> {
+	fn handle(tx: &Tx) -> Result<(), TransactionValidityError> {
 		if tx.body.memo.len().saturated_into::<u64>() > T::MaxMemoCharacters::get() {
 			// TODO: Consider use InvalidTransaction::Custom
 			return Err(TransactionValidityError::Invalid(InvalidTransaction::Call));

@@ -27,7 +27,7 @@
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 mod compat;
-mod decorators;
+mod handlers;
 mod msgs;
 
 use frame_support::{
@@ -323,7 +323,7 @@ impl pallet_cosmos::Config for Runtime {
 	/// Convert a weight value into a deductible fee based on the currency type.
 	type WeightToFee = IdentityFee<Balance>;
 	/// Verify the validity of a Cosmos transaction.
-	type AnteDecorators = decorators::AnteDecorators;
+	type AnteHandler = handlers::AnteHandlers<Self>;
 	/// The maximum size of the memo.
 	type MaxMemoCharacters = MaxMemoCharacters;
 

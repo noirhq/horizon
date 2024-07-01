@@ -19,8 +19,8 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(clippy::comparison_chain, clippy::large_enum_variant)]
 
-mod decorators;
+mod handlers;
 mod msgs;
 
-pub use decorators::{AnteDecorator, AnteDecorators};
+pub use handlers::AnteHandler;
 pub use msgs::MsgServiceRouter;

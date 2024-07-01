@@ -28,6 +28,8 @@ where
 {
 	type Error = ();
 
+	// TODO: Register handler
+
 	fn route(type_url: &[u8], value: &[u8]) -> Result<Weight, Self::Error> {
 		match core::str::from_utf8(type_url).map_err(|_| ())? {
 			"/cosmos.bank.v1beta1.MsgSend" => {
