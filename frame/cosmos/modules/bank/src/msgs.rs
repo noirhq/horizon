@@ -26,8 +26,8 @@ use sp_runtime::SaturatedConversion;
 
 pub struct MsgSendHandler<T>(PhantomData<T>);
 
-impl<T> MsgSendHandler<T> {
-	pub fn new() -> Self {
+impl<T> Default for MsgSendHandler<T> {
+	fn default() -> Self {
 		Self(Default::default())
 	}
 }

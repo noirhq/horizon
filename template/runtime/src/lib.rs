@@ -26,8 +26,8 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
-mod compat;
 mod ante;
+mod compat;
 mod msgs;
 
 use frame_support::{

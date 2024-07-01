@@ -31,7 +31,7 @@ where
 	) -> Result<sp_std::boxed::Box<dyn MsgHandler<Error = Self::Error>>, Self::Error> {
 		match core::str::from_utf8(type_url).unwrap() {
 			"/cosmos.bank.v1beta1.MsgSend" =>
-				Ok(sp_std::boxed::Box::new(MsgSendHandler::<T>::new())),
+				Ok(sp_std::boxed::Box::<MsgSendHandler<T>>::default()),
 			_ => Err(()),
 		}
 	}
