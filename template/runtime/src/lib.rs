@@ -303,8 +303,8 @@ impl pallet_timestamp::Config for Runtime {
 
 parameter_types! {
 	pub const MaxMemoCharacters: u64 = 256;
-	pub const StringLimit: u32 = 10;
-	pub NativeDenom: BoundedVec<u8, StringLimit> = (*b"uatom").to_vec().try_into().unwrap();
+	pub const MaxDenomLen: u32 = 128;
+	pub NativeDenom: BoundedVec<u8, MaxDenomLen> = (*b"acdt").to_vec().try_into().unwrap();
 }
 
 impl pallet_cosmos::Config for Runtime {
@@ -326,11 +326,11 @@ impl pallet_cosmos::Config for Runtime {
 	type AnteHandler = ante::AnteHandlers<Self>;
 	/// The maximum size of the memo.
 	type MaxMemoCharacters = MaxMemoCharacters;
-
+	/// The native denomination for the currency.
 	type NativeDenom = NativeDenom;
-
-	type StringLimit = StringLimit;
-
+	/// The maximum length of the denomination.
+	type MaxDenomLen = MaxDenomLen;
+	/// Router for message service handling.
 	type MsgServiceRouter = MsgServiceRouter<Self>;
 }
 

@@ -24,18 +24,18 @@ pub mod weights;
 
 pub use self::pallet::*;
 use frame_support::{
-	dispatch::{DispatchInfo, PostDispatchInfo},
+	dispatch::{DispatchErrorWithPostInfo, DispatchInfo, PostDispatchInfo},
 	pallet_prelude::{DispatchResultWithPostInfo, Pays},
 	traits::{
 		tokens::{fungible::Inspect, Fortitude, Preservation},
 		Currency, Get,
 	},
-	weights::{Weight, WeightToFee},
+	weights::{constants::ExtrinsicBaseWeight, Weight, WeightToFee},
 };
 use frame_system::{pallet_prelude::OriginFor, CheckWeight};
 use hp_cosmos::{Account, PublicKey, SignerPublicKey};
 use hp_io::crypto::ripemd160;
-use pallet_cosmos_modules::{AnteHandler, MsgServiceRouter};
+use pallet_cosmos_modules::{ante::AnteHandler, msgs::MsgServiceRouter};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
 use sp_core::H160;
@@ -45,7 +45,7 @@ use sp_runtime::{
 	transaction_validity::{
 		InvalidTransaction, TransactionValidity, TransactionValidityError, ValidTransactionBuilder,
 	},
-	RuntimeDebug,
+	DispatchError, RuntimeDebug,
 };
 use sp_std::{marker::PhantomData, vec::Vec};
 pub use weights::*;
@@ -163,7 +163,7 @@ pub mod pallet {
 	use super::*;
 	use frame_support::pallet_prelude::*;
 	use hp_cosmos::Any;
-	use pallet_cosmos_modules::{AnteHandler, MsgServiceRouter};
+	use pallet_cosmos_modules::{ante::AnteHandler, msgs::MsgServiceRouter};
 
 	#[pallet::pallet]
 	#[pallet::without_storage_info]
@@ -198,20 +198,20 @@ pub mod pallet {
 		/// The maximum size of the memo.
 		#[pallet::constant]
 		type MaxMemoCharacters: Get<u64>;
-
+		/// The native denomination for the currency.
 		#[pallet::constant]
-		type NativeDenom: Get<BoundedVec<u8, Self::StringLimit>>;
-
+		type NativeDenom: Get<BoundedVec<u8, Self::MaxDenomLen>>;
+		/// The maximum length of the denomination.
 		#[pallet::constant]
-		type StringLimit: Get<u32>;
-
+		type MaxDenomLen: Get<u32>;
+		/// Router for message service handling.
 		type MsgServiceRouter: MsgServiceRouter;
 	}
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event {
-		Executed { code: u32, gas_used: Weight, messages: Vec<Any> },
+		Executed { gas_used: Weight, messages: Vec<Any> },
 	}
 
 	#[pallet::error]
@@ -298,11 +298,30 @@ impl<T: Config> Pallet<T> {
 	}
 
 	fn apply_validated_transaction(source: H160, tx: hp_cosmos::Tx) -> DispatchResultWithPostInfo {
-		let mut total_weight = Weight::zero();
+		let mut total_weight = ExtrinsicBaseWeight::get();
+
 		for msg in tx.body.messages.iter() {
 			let handler = T::MsgServiceRouter::route(&msg.type_url).unwrap();
-			let result = handler.handle(msg);
+			match handler.handle(msg) {
+				Ok(weight) => {
+					total_weight = total_weight.saturating_add(weight);
+				},
+				Err(e) => {
+					total_weight = total_weight.saturating_add(e.weight);
+
+					return Err(DispatchErrorWithPostInfo {
+						post_info: PostDispatchInfo {
+							actual_weight: Some(total_weight),
+							pays_fee: Pays::Yes,
+						},
+						error: DispatchError::Other(""),
+					});
+				},
+			}
 		}
+
+		Self::deposit_event(Event::Executed { gas_used: total_weight, messages: tx.body.messages });
+
 		Ok(PostDispatchInfo { actual_weight: Some(total_weight), pays_fee: Pays::Yes })
 	}
 

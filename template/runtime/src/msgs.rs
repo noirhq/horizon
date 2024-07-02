@@ -17,10 +17,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 use pallet_cosmos_bank::msgs::MsgSendHandler;
-use pallet_cosmos_modules::MsgHandler;
+use pallet_cosmos_modules::msgs::MsgHandler;
 
 pub struct MsgServiceRouter<T>(sp_std::marker::PhantomData<T>);
-impl<T> pallet_cosmos_modules::MsgServiceRouter for MsgServiceRouter<T>
+impl<T> pallet_cosmos_modules::msgs::MsgServiceRouter for MsgServiceRouter<T>
 where
 	T: frame_system::Config + pallet_cosmos::Config,
 {

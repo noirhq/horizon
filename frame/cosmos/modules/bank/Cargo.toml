@@ -15,6 +15,7 @@ sp-std = { workspace = true }
 
 hp-cosmos = { workspace = true }
 hp-io = { workspace = true }
+pallet-balances = { workspace = true }
 pallet-cosmos = { workspace = true }
 pallet-cosmos-modules = { workspace = true }
 
@@ -26,6 +27,7 @@ std = [
 	"sp-std/std",
 	"hp-cosmos/std",
 	"hp-io/std",
+	"pallet-balances/std",
 	"pallet-cosmos/std",
 	"pallet-cosmos-modules/std",
 ]

@@ -16,16 +16,23 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+use frame_support::weights::Weight;
 use hp_cosmos::Any;
 use sp_runtime::RuntimeString;
 
+pub struct MsgHandlerErrorInfo {
+	pub weight: Weight,
+	pub error: MsgHandlerError,
+}
+
+#[derive(Debug)]
 pub enum MsgHandlerError {
 	InvalidMsg,
 	Custom(RuntimeString),
 }
 
 pub trait MsgHandler {
-	fn handle(&self, msg: &Any) -> Result<(), MsgHandlerError>;
+	fn handle(&self, msg: &Any) -> Result<Weight, MsgHandlerErrorInfo>;
 }
 
 pub trait MsgServiceRouter {

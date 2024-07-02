@@ -18,7 +18,7 @@
 
 use hp_cosmos::{PublicKey, SignerPublicKey, Tx};
 use hp_io::crypto::secp256k1_ecdsa_verify;
-use pallet_cosmos_modules::AnteHandler;
+use pallet_cosmos_modules::ante::AnteHandler;
 use sp_runtime::transaction_validity::{InvalidTransaction, TransactionValidityError};
 use sp_std::marker::PhantomData;
 

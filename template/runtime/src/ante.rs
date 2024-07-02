@@ -22,7 +22,7 @@ use pallet_cosmos_auth::{
 };
 
 pub struct AnteHandlers<T>(sp_std::marker::PhantomData<T>);
-impl<T> pallet_cosmos_modules::AnteHandler for AnteHandlers<T>
+impl<T> pallet_cosmos_modules::ante::AnteHandler for AnteHandlers<T>
 where
 	T: frame_system::Config + pallet_cosmos::Config,
 {
